@@ -4,18 +4,16 @@ from tkcalendar import Calendar
 import datetime
 
 
-def create_main_frame(): # Cria a interface
+def create_main_frame(): # Cria a interface grafica
 
-    data_hora_atual = datetime.datetime.now() # Obter a data e hora atual
-
-    # Extrair o número do mês e o ano da data atual
-    month = data_hora_atual.month
-    year = data_hora_atual.year
+    data_hora_atual = datetime.datetime.now() # Obtem a data e hora atual
 
     # Variaveis NonLocal
+    month = data_hora_atual.month # Obtem o mês atual
+    year = data_hora_atual.year # Obtem o dia atual
     valor = "teste"
     start_date = ""
-    final_date = " "
+    final_date = ""
 
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
@@ -23,19 +21,18 @@ def create_main_frame(): # Cria a interface
     frame_main.title("Correção FIDC")
     frame_main.resizable(False, False)
 
-    def select_start_date(): # Cria um frame para selecionar o mês e o dia
+    def select_start_date(): # Cria um frame para selecionar a data de fim de vencimento
         nonlocal start_date
-
         def back(): # Volta a tela
             frame_select_date.destroy()
-        def confirm():
-            nonlocal start_date
-            selected_date_str = cal.get_date()
-            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Ajustar o formato aqui
+        def confirm(): # Confirma a seleção da data
+            nonlocal start_date # Chama a variavel nonlocal start date
+            selected_date_str = cal.get_date() # Pega o valor da data
+            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Formata o campo de data
             start_date = selected_date.strftime("%d/%m/%Y")
-            entry_start_date.delete(0, "end")
-            entry_start_date.insert(0, start_date)
-            frame_select_date.destroy()
+            entry_start_date.delete(0, "end") # Deleta o que tiver presente no entry
+            entry_start_date.insert(0, start_date) # Adiciona a nova data no entry
+            frame_select_date.destroy() # volta para o frame_main
 
         frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
         frame_select_date.place(x=10, y=10)
@@ -52,19 +49,18 @@ def create_main_frame(): # Cria a interface
         cal = Calendar(frame_select_date, selectmode="day", year=year, month=month)
         cal.place(x=25, y=30)
 
-    def select_final_date(): # Cria um frame para selecionar o mês e o dia
+    def select_final_date(): # Cria um frame para selecionar a data de fim de vencimento
         nonlocal final_date
-
         def back(): # Volta a tela
             frame_select_date.destroy()
-        def confirm():
-            nonlocal final_date
-            selected_date_str = cal.get_date()
-            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Ajustar o formato aqui
+        def confirm(): # Confirma a seleção da data
+            nonlocal final_date # Chama a variavel nonlocal start date
+            selected_date_str = cal.get_date() # Pega o valor da data
+            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Formata o campo de data
             final_date = selected_date.strftime("%d/%m/%Y")
-            entry_final_date.delete(0, "end")
-            entry_final_date.insert(0, final_date)
-            frame_select_date.destroy()
+            entry_final_date.delete(0, "end") # Deleta o que tiver presente no entry
+            entry_final_date.insert(0, final_date) # Adiciona a nova data no entry
+            frame_select_date.destroy() # volta para o frame_main
 
         frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
         frame_select_date.place(x=10, y=10)
