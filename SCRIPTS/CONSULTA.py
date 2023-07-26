@@ -29,14 +29,28 @@ def close_db(): # Fecha a conexão com o banco de dados.
     if conn is not None:
         conn.close()
 
-def compare_db(): # Compara o cnpj recebido no banco de dados para identificar o estabelecimento
+def query_db(): # Faz a consulta no banco e traz o resultado desejado
 
     global cursor  # Utiliza a variável global
     try:
         query = f"SELECT * FROM CLIEN WHERE Cod_GrpCli IN (145, 146, 147) and Cgc_Cpf"
         cursor.execute(query)
         result = cursor.fetchall()
+    except pyodbc.Error as e:
+        print("Erro ao executar a consulta no banco de dados:", e)
 
+def update_db(): # Faz o update no banco
+    global cursor
+
+    try:
+        update = f""
+        cursor.execute(update)
+        result = cursor.fetchall()
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
+
+
+
+
+
