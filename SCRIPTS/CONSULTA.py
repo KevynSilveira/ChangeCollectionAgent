@@ -8,10 +8,10 @@ def access_db():
     global conn, cursor  # Utiliza as variáveis globais
 
     try:
-        server = "192.168.64.245"
-        database = "DMD_TESTE"
-        username = "sa"
-        password = "t$gmminf"
+        server = ""
+        database = ""
+        username = ""
+        password = ""
 
         # Monta os dados para enviar para o banco de dados (credenciais)
         conn_string = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
