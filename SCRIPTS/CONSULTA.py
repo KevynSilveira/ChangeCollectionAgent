@@ -29,15 +29,28 @@ def close_db(): # Fecha a conexão com o banco de dados.
     if conn is not None:
         conn.close()
 
-def query_db(): # Faz a consulta no banco e traz o resultado desejado
+def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a consulta no banco e traz o resultado desejado
 
-    global cursor  # Utiliza a variável global
     try:
-        query = f"SELECT * FROM CLIEN WHERE Cod_GrpCli IN (145, 146, 147) and Cgc_Cpf"
+        query = f"DECLARE @cliente INT = {cliente};" \
+                f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
+                f"DECLARE @agente INT = {agente};" \
+                f"DECLARE @estabelecimento INT = {estabelecimento};" \
+                f"DECLARE @datainicio DATE = '{data_inicio}'" \
+                f"DECLARE @datafim DATE = '{data_fim}'" \
+                f"SELECT * FROM CTREC" \
+                f" WHERE cod_estabe = @estabelecimento" \
+                f" AND cod_agente = @agente" \
+                f" AND status = 'A'" \
+                f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial)"
+
         cursor.execute(query)
         result = cursor.fetchall()
+        print(result)
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
+
 
 def update_db(): # Faz o update no banco
     global cursor
@@ -54,3 +67,5 @@ def update_db(): # Faz o update no banco
 
 
 
+access_db()
+query_db( 49918, 2747, 1, '2023-07-01', '2023-07-27')
