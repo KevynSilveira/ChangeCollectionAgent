@@ -77,11 +77,11 @@ def create_main_frame(): # Cria a interface grafica
         cal = Calendar(frame_select_date, selectmode="day", year=year, month=month)
         cal.place(x=25, y=30)
 
-    def create_confirmation_frame():
+    def create_confirmation_frame(): # Cria um frame de confirmação
         nonlocal valor
         def back(): # Volta a tela
             frame_confirmation.destroy()
-        def confirm():
+        def confirm(): # Confirma o update do agente cobrador
             print("comando executado")
 
         frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
@@ -96,11 +96,9 @@ def create_main_frame(): # Cria a interface grafica
         button_confirm = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
         button_confirm.place(x=155, y=220)
 
-    def validate_input(char):
-        # Verifica se o caractere é um dígito numérico
-        if char.isdigit():
-            # Verifica o comprimento atual do texto no Entry
-            entry_text = entry_collection_agent.get()
+    def validate_input(char): # Verifica se está sendo digitado apenas números e limita o campo a 4 números
+        if char.isdigit(): # Verifica se o caractere é um dígito numérico
+            entry_text = entry_collection_agent.get() # Verifica o comprimento atual do texto no Entry
             if len(entry_text) < 4:
                 return True
         return False
