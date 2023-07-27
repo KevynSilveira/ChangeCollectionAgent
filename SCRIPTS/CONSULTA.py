@@ -8,10 +8,10 @@ def access_db():
     global conn, cursor  # Utiliza as variáveis globais
 
     try:
-        server = ""
-        database = ""
-        username = ""
-        password = ""
+        server = "192.168.64.245"
+        database = "DMD_TESTE"
+        username = "sa"
+        password = "t$gmminf"
 
         # Monta os dados para enviar para o banco de dados (credenciais)
         conn_string = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
@@ -69,9 +69,3 @@ def update_db(): # Faz o update no banco
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
-
-
-#access_db()
-
-#query_result = query_db(49918, 2747, 1, '2023-07-01', '2023-07-27')
-#print(query_result)
