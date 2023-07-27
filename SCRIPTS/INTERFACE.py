@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from CONSULTA import update_db, query_db
+from CONSULTA import update_db, query_db, access_db
 from tkcalendar import Calendar
 import datetime
+from tkinter import messagebox
 
 
 def create_main_frame(): # Cria a interface grafica
@@ -9,20 +10,24 @@ def create_main_frame(): # Cria a interface grafica
     data_hora_atual = datetime.datetime.now() # Obtem a data e hora atual
 
     # Variaveis NonLocal
-    month = data_hora_atual.month # Obtem o mês atual
-    year = data_hora_atual.year # Obtem o dia atual
-    valor = "teste"
-    start_date = ""
-    final_date = ""
-
     establishment = ""
     start_date = ""
     final_date = ""
     collection_agent = ""
+    result = ""
+    query_cont_result = 0
+    month = data_hora_atual.month # Obtem o mês atual
+    year = data_hora_atual.year # Obtem o dia atual
+    valor = f"Foi selecionado {result}!"
+    start_date = ""
+    final_date = ""
+    client = ""
+
+
 
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
-    frame_main.geometry("310x270")
+    frame_main.geometry("310x310")
     frame_main.title("Correção FIDC")
     frame_main.resizable(False, False)
 
@@ -39,14 +44,14 @@ def create_main_frame(): # Cria a interface grafica
             entry_start_date.insert(0, start_date) # Adiciona a nova data no entry
             frame_select_date.destroy() # volta para o frame_main
 
-        frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
+        frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_select_date.place(x=10, y=10)
 
         button_back = ctk.CTkButton(master=frame_select_date, width=100, height=30, corner_radius=8, text="Cancelar", command=back)
-        button_back.place(x=45, y=220)
+        button_back.place(x=45, y=260)
 
         button_confirm = ctk.CTkButton(master=frame_select_date, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
-        button_confirm.place(x=155, y=220)
+        button_confirm.place(x=155, y=260)
 
         label_start = ctk.CTkLabel(master=frame_select_date, text="Selecione a data de inicio:")
         label_start.place(x=75, y=0)
@@ -67,14 +72,14 @@ def create_main_frame(): # Cria a interface grafica
             entry_final_date.insert(0, final_date) # Adiciona a nova data no entry
             frame_select_date.destroy() # volta para o frame_main
 
-        frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
+        frame_select_date = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_select_date.place(x=10, y=10)
 
         button_back = ctk.CTkButton(master=frame_select_date, width=100, height=30, corner_radius=8, text="Cancelar", command=back)
-        button_back.place(x=45, y=220)
+        button_back.place(x=45, y=260)
 
         button_confirm = ctk.CTkButton(master=frame_select_date, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
-        button_confirm.place(x=155, y=220)
+        button_confirm.place(x=155, y=260)
 
         label_final = ctk.CTkLabel(master=frame_select_date, text="Selecione a data de fim:")
         label_final.place(x=75, y=0)
@@ -101,16 +106,15 @@ def create_main_frame(): # Cria a interface grafica
         button_confirm = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
         button_confirm.place(x=155, y=220)
 
-    def validate_input(char): # Verifica se está sendo digitado apenas números e limita o campo a 4 números
-        if char.isdigit(): # Verifica se o caractere é um dígito numérico
-            entry_text = entry_collection_agent.get() # Verifica o comprimento atual do texto no Entry
-            if len(entry_text) < 4:
+    def validate_input(char):
+        if char.isdigit() or char == '\b':
+            entry_text = entry_collection_agent.get()
+            if len(entry_text) < 4 or char == '\b':
                 return True
         return False
-
-    def check_field ():
+    def check_field():
         try:
-            nonlocal establishment, start_date, final_date, collection_agent
+            nonlocal establishment, start_date, final_date, collection_agent, query_cont_result, result, client
 
             start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
             final_date_dt = datetime.datetime.strptime(final_date, "%d/%m/%Y")
@@ -126,10 +130,20 @@ def create_main_frame(): # Cria a interface grafica
             start_date = entry_start_date.get()
             final_date = entry_final_date.get()
             collection_agent = entry_collection_agent.get()
+            client = entry_client.get()
 
-            if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and (establishment == "1" or establishment == "2"):
-                print("deu certo!")
+
+            if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and client != "" and (establishment == "1" or establishment == "2"):
+
+                establishment = int(establishment) # Converte para inteiro
+                collection_agent = int(collection_agent) # Converte para inteiro
+
+                access_db() # Acessa o banco de dados
+                query_cont_result = query_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
+                result = query_cont_result[0][0]
+                messagebox.showinfo("Atenção", f"Selecionado {result}!")
                 create_confirmation_frame()
+                print("deu certo!")
             else:
                 print("Preencha todos os campos")
                 print(start_date)
@@ -137,8 +151,8 @@ def create_main_frame(): # Cria a interface grafica
                 print(collection_agent)
                 print(establishment)
 
-        except:
-            print("Preencha todos os campos")
+        except Exception as e:
+            print(f"Erro: {str(e)}")
 
 
     button_start_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Selecione a data de inicio", command=select_start_date)
@@ -167,15 +181,21 @@ def create_main_frame(): # Cria a interface grafica
     entry_collection_agent.configure(validate="key", validatecommand=(vcmd, "%S"))
     entry_collection_agent.configure(justify="center") # Centraliza o texto no entry
 
+    label_client = ctk.CTkLabel(master=frame_main, text="Selecione um client:")
+    label_client.place(x=10, y=140)
+
+    entry_client = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
+    entry_client.place(x=200, y=140)
+
     option_establishment = ["SC", "RS"]  # Opções de estabelecimento
     combobox_establishment = ctk.CTkComboBox(master=frame_main, values=option_establishment, width=290, height=30, state="readonly")
     combobox_establishment.set("---Selecione uma linguagem---") # Indica que precisa escolher um estabelecimento
     combobox_establishment.configure(justify="center") # Centraliza o texto na combobox
-    combobox_establishment.place(x=10, y=140)
+    combobox_establishment.place(x=10, y=180)
 
 
     button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=check_field, text= "Selecionar")
-    button_select.place(x=105, y=235)
+    button_select.place(x=105, y=275)
 
 
     frame_main.mainloop()

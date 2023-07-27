@@ -38,16 +38,22 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
                 f"DECLARE @datainicio DATE = '{data_inicio}'" \
                 f"DECLARE @datafim DATE = '{data_fim}'" \
-                f"SELECT * FROM CTREC" \
+                f" ; WITH ResultadoConsulta AS (" \
+                f" SELECT cod_documento FROM CTREC" \
                 f" WHERE cod_estabe = @estabelecimento" \
                 f" AND cod_agente = @agente" \
                 f" AND status = 'A'" \
                 f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial)"
+                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f")" \
+                f" SELECT COUNT (*) AS Quantidadetotal" \
+                f" FROM ResultadoConsulta;"
 
         cursor.execute(query)
         result = cursor.fetchall()
         print(result)
+        return result  # Retorna o resultado da consulta
+        # Get the number of rows selected
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
 
@@ -59,13 +65,13 @@ def update_db(): # Faz o update no banco
         update = f""
         cursor.execute(update)
         result = cursor.fetchall()
+        print(result)
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
 
 
+#access_db()
 
-
-
-access_db()
-query_db( 49918, 2747, 1, '2023-07-01', '2023-07-27')
+#query_result = query_db(49918, 2747, 1, '2023-07-01', '2023-07-27')
+#print(query_result)
