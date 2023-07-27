@@ -15,6 +15,11 @@ def create_main_frame(): # Cria a interface grafica
     start_date = ""
     final_date = ""
 
+    establishment = ""
+    start_date = ""
+    final_date = ""
+    collection_agent = ""
+
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
     frame_main.geometry("310x270")
@@ -103,6 +108,38 @@ def create_main_frame(): # Cria a interface grafica
                 return True
         return False
 
+    def check_field ():
+        try:
+            nonlocal establishment, start_date, final_date, collection_agent
+
+            start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
+            final_date_dt = datetime.datetime.strptime(final_date, "%d/%m/%Y")
+
+            establishment = combobox_establishment.get()
+            if establishment == "SC":
+                establishment = "1"
+            elif establishment == "RS":
+                establishment = "2"
+            else:
+                print("Selecione um estabecimento!")
+
+            start_date = entry_start_date.get()
+            final_date = entry_final_date.get()
+            collection_agent = entry_collection_agent.get()
+
+            if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and (establishment == "1" or establishment == "2"):
+                print("deu certo!")
+                create_confirmation_frame()
+            else:
+                print("Preencha todos os campos")
+                print(start_date)
+                print(final_date)
+                print(collection_agent)
+                print(establishment)
+
+        except:
+            print("Preencha todos os campos")
+
 
     button_start_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Selecione a data de inicio", command=select_start_date)
     button_start_date.place(x=10, y=10)
@@ -137,7 +174,7 @@ def create_main_frame(): # Cria a interface grafica
     combobox_establishment.place(x=10, y=140)
 
 
-    button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=create_confirmation_frame, text= "Selecionar")
+    button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=check_field, text= "Selecionar")
     button_select.place(x=105, y=235)
 
 
