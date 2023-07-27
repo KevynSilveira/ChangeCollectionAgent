@@ -16,29 +16,27 @@ def create_main_frame(): # Cria a interface grafica
     collection_agent = ""
     result = ""
     query_cont_result = 0
-    month = data_hora_atual.month # Obtem o mês atual
-    year = data_hora_atual.year # Obtem o dia atual
-    valor = f"Foi selecionado {result}!"
     start_date = ""
     final_date = ""
     client = ""
 
-
+    month = data_hora_atual.month # Obtem o mês atual
+    year = data_hora_atual.year # Obtem o dia atual
+    text = f"Foi selecionado {result}!"
 
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
-    frame_main.geometry("310x310")
-    frame_main.title("Correção FIDC")
-    frame_main.resizable(False, False)
+    frame_main.geometry("310x310") # Definindo o tamanho do frame
+    frame_main.title("CORREÇÃO FIDC") # Definindo o titulo do frame
+    frame_main.resizable(False, False) # Tirando o botão de maximizar
 
     def select_start_date(): # Cria um frame para selecionar a data de fim de vencimento
-        nonlocal start_date
         def back(): # Volta a tela
             frame_select_date.destroy()
         def confirm(): # Confirma a seleção da data
-            nonlocal start_date # Chama a variavel nonlocal start date
+            nonlocal start_date
             selected_date_str = cal.get_date() # Pega o valor da data
-            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Formata o campo de data
+            selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y") # Formata o campo de data
             start_date = selected_date.strftime("%d/%m/%Y")
             entry_start_date.delete(0, "end") # Deleta o que tiver presente no entry
             entry_start_date.insert(0, start_date) # Adiciona a nova data no entry
@@ -60,7 +58,6 @@ def create_main_frame(): # Cria a interface grafica
         cal.place(x=25, y=30)
 
     def select_final_date(): # Cria um frame para selecionar a data de fim de vencimento
-        nonlocal final_date
         def back(): # Volta a tela
             frame_select_date.destroy()
         def confirm(): # Confirma a seleção da data
@@ -88,7 +85,7 @@ def create_main_frame(): # Cria a interface grafica
         cal.place(x=25, y=30)
 
     def create_confirmation_frame(): # Cria um frame de confirmação
-        nonlocal valor
+        nonlocal text
         def back(): # Volta a tela
             frame_confirmation.destroy()
         def confirm(): # Confirma o update do agente cobrador
@@ -97,7 +94,7 @@ def create_main_frame(): # Cria a interface grafica
         frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_confirmation.place(x=10, y=10)
 
-        label_warning = ctk.CTkLabel(master=frame_confirmation, text=valor)
+        label_warning = ctk.CTkLabel(master=frame_confirmation, text=text)
         label_warning.place(x=50, y=50)
 
         button_back = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Cancelar", command=back)
@@ -106,20 +103,16 @@ def create_main_frame(): # Cria a interface grafica
         button_confirm = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
         button_confirm.place(x=155, y=260)
 
-    def validate_input(char):
-        if char.isdigit() or char == '\b':
-            entry_text = entry_collection_agent.get()
-            if len(entry_text) < 4 or char == '\b':
-                return True
-        return False
-    def check_field():
+    def check_field(): # Faz a verificação se todos os campos estão preenchidos e chama a função query_db
         try:
+            # Chama as variaveis nonLocal
             nonlocal establishment, start_date, final_date, collection_agent, query_cont_result, result, client
 
+            # Converte a data
             start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
             final_date_dt = datetime.datetime.strptime(final_date, "%d/%m/%Y")
 
-            establishment = combobox_establishment.get()
+            establishment = combobox_establishment.get() # Verifica qual estabelecimento é e atribui o valor a ele
             if establishment == "SC":
                 establishment = "1"
             elif establishment == "RS":
@@ -127,12 +120,12 @@ def create_main_frame(): # Cria a interface grafica
             else:
                 messagebox.showerror("ATENÇÃO!", "Selecione um estabelecimento!")
 
-            start_date = entry_start_date.get()
-            final_date = entry_final_date.get()
-            collection_agent = entry_collection_agent.get()
-            client = entry_client.get()
+            start_date = entry_start_date.get() # Pega o campo data inicio
+            final_date = entry_final_date.get() # Pega o campo data final
+            collection_agent = entry_collection_agent.get() # Pega o campo agente cobrador
+            client = entry_client.get() # Pega o campo cliente
 
-
+            # Verifica se todos os campos estão preenchidos
             if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and client != "" and (establishment == "1" or establishment == "2"):
 
                 establishment = int(establishment) # Converte para inteiro
@@ -140,9 +133,9 @@ def create_main_frame(): # Cria a interface grafica
 
                 access_db() # Acessa o banco de dados
                 query_cont_result = query_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
-                result = query_cont_result[0][0]
-                messagebox.showinfo("Atenção", f"Selecionado {result}!")
-                create_confirmation_frame()
+                result = query_cont_result[0][0] # Pega o número de consulta
+                messagebox.showinfo("Atenção", f"Selecionado {result}!") # Exibe quantas linhas foram selecionadas
+                create_confirmation_frame() # Cria o frame para confirmação de alteração
                 print("deu certo!")
             else:
                 print("Preencha todos os campos!")
@@ -198,7 +191,6 @@ def create_main_frame(): # Cria a interface grafica
 
     button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=check_field, text= "Selecionar")
     button_select.place(x=105, y=275)
-
 
     frame_main.mainloop()
 
