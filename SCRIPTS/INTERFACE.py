@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from CONSULTA import update_db, query_db, access_db
+from CONSULTA import update_db, query_count_db, access_db, query_db
 from tkcalendar import Calendar
 import datetime
 from tkinter import messagebox
@@ -132,9 +132,10 @@ def create_main_frame(): # Cria a interface grafica
                 collection_agent = int(collection_agent) # Converte para inteiro
 
                 access_db() # Acessa o banco de dados
-                query_cont_result = query_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
+                query_cont_result = query_count_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
                 result = query_cont_result[0][0] # Pega o número de consulta
                 messagebox.showinfo("Atenção", f"Selecionado {result}!") # Exibe quantas linhas foram selecionadas
+                query_db(client, collection_agent, establishment, start_date, final_date)
                 create_confirmation_frame() # Cria o frame para confirmação de alteração
                 print("deu certo!")
             else:
