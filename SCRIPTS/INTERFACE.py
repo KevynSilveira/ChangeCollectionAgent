@@ -22,7 +22,7 @@ def create_main_frame(): # Cria a interface grafica
 
     month = data_hora_atual.month # Obtem o mês atual
     year = data_hora_atual.year # Obtem o dia atual
-    text = f"Foi selecionado {result}!"
+    text = ""
 
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
@@ -58,6 +58,9 @@ def create_main_frame(): # Cria a interface grafica
         cal.place(x=25, y=30)
 
     def select_final_date(): # Cria um frame para selecionar a data de fim de vencimento
+
+        nonlocal text
+        text = f"Você selecionou {result}"
         def back(): # Volta a tela
             frame_select_date.destroy()
         def confirm(): # Confirma a seleção da data
@@ -128,15 +131,17 @@ def create_main_frame(): # Cria a interface grafica
             # Verifica se todos os campos estão preenchidos
             if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and client != "" and (establishment == "1" or establishment == "2"):
 
+                nonlocal result
                 establishment = int(establishment) # Converte para inteiro
                 collection_agent = int(collection_agent) # Converte para inteiro
 
                 access_db() # Acessa o banco de dados
                 query_cont_result = query_count_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
-                result = query_cont_result[0][0] # Pega o número de consulta
-                messagebox.showinfo("Atenção", f"Selecionado {result}!") # Exibe quantas linhas foram selecionadas
+                selected_lines = query_cont_result[0][0] # Pega o número de consulta
+                messagebox.showinfo("Atenção", f"Selecionado {selected_lines}!") # Exibe quantas linhas foram selecionadas
                 query_db(client, collection_agent, establishment, start_date, final_date)
                 create_confirmation_frame() # Cria o frame para confirmação de alteração
+                result = selected_lines
                 print("deu certo!")
             else:
                 print("Preencha todos os campos!")
