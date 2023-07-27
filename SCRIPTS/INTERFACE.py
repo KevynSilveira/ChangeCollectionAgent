@@ -94,17 +94,17 @@ def create_main_frame(): # Cria a interface grafica
         def confirm(): # Confirma o update do agente cobrador
             print("comando executado")
 
-        frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=255, corner_radius=8)
+        frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_confirmation.place(x=10, y=10)
 
         label_warning = ctk.CTkLabel(master=frame_confirmation, text=valor)
         label_warning.place(x=50, y=50)
 
         button_back = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Cancelar", command=back)
-        button_back.place(x=45, y=220)
+        button_back.place(x=45, y=260)
 
         button_confirm = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Confirmar", command=confirm)
-        button_confirm.place(x=155, y=220)
+        button_confirm.place(x=155, y=260)
 
     def validate_input(char):
         if char.isdigit() or char == '\b':
@@ -125,7 +125,7 @@ def create_main_frame(): # Cria a interface grafica
             elif establishment == "RS":
                 establishment = "2"
             else:
-                print("Selecione um estabecimento!")
+                messagebox.showerror("ATENÇÃO!", "Selecione um estabelecimento!")
 
             start_date = entry_start_date.get()
             final_date = entry_final_date.get()
@@ -145,13 +145,14 @@ def create_main_frame(): # Cria a interface grafica
                 create_confirmation_frame()
                 print("deu certo!")
             else:
-                print("Preencha todos os campos")
+                print("Preencha todos os campos!")
                 print(start_date)
                 print(final_date)
                 print(collection_agent)
                 print(establishment)
 
         except Exception as e:
+            messagebox.showerror("ATENÇÃO", "Preencha todos os campos!")
             print(f"Erro: {str(e)}")
 
 
@@ -177,10 +178,6 @@ def create_main_frame(): # Cria a interface grafica
     entry_collection_agent = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_collection_agent.place(x=200, y=90)
 
-    vcmd = frame_main.register(validate_input)
-    entry_collection_agent.configure(validate="key", validatecommand=(vcmd, "%S"))
-    entry_collection_agent.configure(justify="center") # Centraliza o texto no entry
-
     label_client = ctk.CTkLabel(master=frame_main, text="Selecione um client:")
     label_client.place(x=10, y=140)
 
@@ -193,6 +190,11 @@ def create_main_frame(): # Cria a interface grafica
     combobox_establishment.configure(justify="center") # Centraliza o texto na combobox
     combobox_establishment.place(x=10, y=180)
 
+    # Centraliza o texto no entry
+    entry_collection_agent.configure(justify="center")
+    entry_client.configure(justify="center")
+    entry_start_date.configure(justify="center")
+    entry_final_date.configure(justify="center")
 
     button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=check_field, text= "Selecionar")
     button_select.place(x=105, y=275)
