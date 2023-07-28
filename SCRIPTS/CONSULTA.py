@@ -111,8 +111,7 @@ def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_f
     global cursor
 
     try:
-        query = f"begin tran;" \
-                f"DECLARE @cliente INT = {cliente};" \
+        query = f"DECLARE @cliente INT = {cliente};" \
                 f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
                 f"DECLARE @agente INT = {agente};" \
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
@@ -125,12 +124,15 @@ def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_f
                 f" AND status = 'A'" \
                 f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
                 f" AND (cod_cliente = @cliente OR cgc_matriz = @filial);" \
-                f"commit tran"
+
 
         print(query)
 
         cursor.execute(query)
-        cursor.fetchall()
+        conn.commit()
+
+        rows_affected = cursor.rowcount
+        return rows_affectedat_vencim
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)

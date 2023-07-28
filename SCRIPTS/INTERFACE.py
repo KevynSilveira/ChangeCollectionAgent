@@ -106,6 +106,7 @@ def create_main_frame(): # Cria a interface grafica
                 if response:
                     # Código a ser executado se o usuário confirmar a ação
                     print("Ação confirmada!")
+                    access_db()
                     update_db(client, collection_agent, new_collection_agent, establishment, start_date, final_date)
                 else:
                     # Código a ser executado se o usuário cancelar a ação
@@ -181,10 +182,10 @@ def create_main_frame(): # Cria a interface grafica
             print(f"Erro: {str(e)}")
 
 
-    button_start_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Selecione a data de inicio", command=select_start_date)
+    button_start_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Data incial", command=select_start_date)
     button_start_date.place(x=10, y=10)
 
-    button_final_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Selecione a data de fim", command=select_final_date)
+    button_final_date = ctk.CTkButton(master=frame_main, width=170, height=30, corner_radius=8, text="Data final", command=select_final_date)
     button_final_date.place(x=10, y=50)
 
     entry_start_date = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
@@ -193,29 +194,37 @@ def create_main_frame(): # Cria a interface grafica
     entry_final_date = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_final_date.place(x=200, y=50)
 
-    label_collection_agent = ctk.CTkLabel(master=frame_main, text="Digite o cod agente cobrador:")
+    label_collection_agent = ctk.CTkLabel(master=frame_main, text="Agente cobrador:", width=170)
     label_collection_agent.place(x=10, y=90)
 
     entry_collection_agent = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_collection_agent.place(x=200, y=90)
 
-    label_client = ctk.CTkLabel(master=frame_main, text="Digite o cod client:")
-    label_client.place(x=10, y=140)
+    label_client = ctk.CTkLabel(master=frame_main, text="Cliente:", width=170)
+    label_client.place(x=10, y=130)
 
     entry_client = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
-    entry_client.place(x=200, y=140)
+    entry_client.place(x=200, y=130)
 
     option_establishment = ["SC", "RS"]  # Opções de estabelecimento
-    combobox_establishment = ctk.CTkComboBox(master=frame_main, values=option_establishment, width=290, height=30, state="readonly")
-    combobox_establishment.set("---Selecione uma linguagem---") # Indica que precisa escolher um estabelecimento
+    combobox_establishment = ctk.CTkComboBox(master=frame_main, values=option_establishment, width=140, height=30, state="readonly")
+    combobox_establishment.set("Estabelecimento") # Indica que precisa escolher um estabelecimento
     combobox_establishment.configure(justify="center") # Centraliza o texto na combobox
     combobox_establishment.place(x=10, y=180)
+
+    option_portion = ["A", "B", "C", "D", "E", "F"]  # Opções de estabelecimento
+    combobox_portion = ctk.CTkComboBox(master=frame_main, values=option_portion, width=140, height=30, state="readonly")
+    combobox_portion.set("Parcela") # Indica que precisa escolher um estabelecimento
+    combobox_portion.configure(justify="center") # Centraliza o texto na combobox
+    combobox_portion.place(x=160, y=180)
 
     # Centraliza o texto no entry
     entry_collection_agent.configure(justify="center")
     entry_client.configure(justify="center")
     entry_start_date.configure(justify="center")
     entry_final_date.configure(justify="center")
+    label_client.configure(justify="center")
+    label_collection_agent.configure(justify="center")
 
     button_select = ctk.CTkButton(master=frame_main, width=100, height=30, corner_radius=8, command=check_field, text= "Selecionar")
     button_select.place(x=105, y=275)
