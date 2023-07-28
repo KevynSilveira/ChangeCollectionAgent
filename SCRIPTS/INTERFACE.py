@@ -23,7 +23,7 @@ def create_main_frame(): # Cria a interface grafica
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
     frame_main.geometry("310x310") # Definindo o tamanho do frame
-    frame_main.title("CORREÇÃO FIDC") # Definindo o titulo do frame
+    frame_main.title("ALTERAÇÃO AGENTE COBRADOR") # Definindo o titulo do frame
     frame_main.resizable(False, False) # Tirando o botão de maximizar
 
     def select_start_date(): # Cria um frame para selecionar a data de fim de vencimento
