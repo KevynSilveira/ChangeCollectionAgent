@@ -4,25 +4,21 @@ from tkcalendar import Calendar
 import datetime
 from tkinter import messagebox
 
+# Variaveis global
+establishment = ""
+start_date = ""
+final_date = ""
+collection_agent = ""
+result = 0
+query_cont_result = 0
+client = ""
 
 def create_main_frame(): # Cria a interface grafica
 
     data_hora_atual = datetime.datetime.now() # Obtem a data e hora atual
-
-    # Variaveis NonLocal
-    establishment = ""
-    start_date = ""
-    final_date = ""
-    collection_agent = ""
-    result = ""
-    query_cont_result = 0
-    start_date = ""
-    final_date = ""
-    client = ""
-
     month = data_hora_atual.month # Obtem o mês atual
     year = data_hora_atual.year # Obtem o dia atual
-    text = ""
+
 
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
@@ -34,7 +30,7 @@ def create_main_frame(): # Cria a interface grafica
         def back(): # Volta a tela
             frame_select_date.destroy()
         def confirm(): # Confirma a seleção da data
-            nonlocal start_date
+            global start_date
             selected_date_str = cal.get_date() # Pega o valor da data
             selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y") # Formata o campo de data
             start_date = selected_date.strftime("%d/%m/%Y")
@@ -59,12 +55,12 @@ def create_main_frame(): # Cria a interface grafica
 
     def select_final_date(): # Cria um frame para selecionar a data de fim de vencimento
 
-        nonlocal text
+        global text
         text = f"Você selecionou {result}"
         def back(): # Volta a tela
             frame_select_date.destroy()
         def confirm(): # Confirma a seleção da data
-            nonlocal final_date # Chama a variavel nonlocal start date
+            global final_date # Chama a variavel global start date
             selected_date_str = cal.get_date() # Pega o valor da data
             selected_date = datetime.datetime.strptime(selected_date_str, "%m/%d/%y")  # Formata o campo de data
             final_date = selected_date.strftime("%d/%m/%Y")
@@ -88,17 +84,46 @@ def create_main_frame(): # Cria a interface grafica
         cal.place(x=25, y=30)
 
     def create_confirmation_frame(): # Cria um frame de confirmação
-        nonlocal text
+        global result, establishment, start_date, final_date, client, collection_agent
         def back(): # Volta a tela
             frame_confirmation.destroy()
         def confirm(): # Confirma o update do agente cobrador
             print("comando executado")
+            print("estabelecimento:", establishment)
+            print("Data inicio:", start_date)
+            print("Data final:", final_date)
+            print("Cliente:", client)
+            print("Agente cobrador:", collection_agent)
+
+            new_collection_agent = entry_new_collection_agent.get()
+            #new_collection_agent = int(new_collection_agent)
+
+            if not new_collection_agent:  # Verifica se a variável está vazia
+                messagebox.showerror("Erro", "Preencha todos os campos!")
+
+            else:
+                response = messagebox.askyesno("Confirmação", f"Você tem certeza que deseja alterar o agente cobrador {collection_agent} pelo {new_collection_agent}?")
+                if response:
+                    # Código a ser executado se o usuário confirmar a ação
+                    print("Ação confirmada!")
+                    update_db(client, collection_agent, new_collection_agent, establishment, start_date, final_date)
+                else:
+                    # Código a ser executado se o usuário cancelar a ação
+                    print("Ação cancelada!")
+
 
         frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_confirmation.place(x=10, y=10)
 
-        label_warning = ctk.CTkLabel(master=frame_confirmation, text=text)
-        label_warning.place(x=50, y=50)
+        label_select = ctk.CTkLabel(master=frame_confirmation, text=f"Você selecinou {result} linhas!", width=150)
+        label_select.place(x=70, y=20)
+
+        label_new_collection_agent = ctk.CTkLabel(master=frame_confirmation, text="Digite o código do\n novo agente cobrador", width=150)
+        label_new_collection_agent.place(x=70, y=90)
+
+        entry_new_collection_agent = ctk.CTkEntry(master=frame_confirmation, width=150, height=30, corner_radius=8)
+        entry_new_collection_agent.place(x=70, y=130)
+        entry_new_collection_agent.configure(justify="center")
 
         button_back = ctk.CTkButton(master=frame_confirmation, width=100, height=30, corner_radius=8, text="Cancelar", command=back)
         button_back.place(x=45, y=260)
@@ -108,8 +133,8 @@ def create_main_frame(): # Cria a interface grafica
 
     def check_field(): # Faz a verificação se todos os campos estão preenchidos e chama a função query_db
         try:
-            # Chama as variaveis nonLocal
-            nonlocal establishment, start_date, final_date, collection_agent, query_cont_result, result, client
+            # Chama as variaveis global
+            global establishment, start_date, final_date, collection_agent, query_cont_result, result, client
 
             # Converte a data
             start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
@@ -131,17 +156,18 @@ def create_main_frame(): # Cria a interface grafica
             # Verifica se todos os campos estão preenchidos
             if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and client != "" and (establishment == "1" or establishment == "2"):
 
-                nonlocal result
+                global result
                 establishment = int(establishment) # Converte para inteiro
                 collection_agent = int(collection_agent) # Converte para inteiro
 
                 access_db() # Acessa o banco de dados
                 query_cont_result = query_count_db(client, collection_agent, establishment, start_date, final_date) # Faz a consulta e pega os parametros com base nas informações preenchidas
                 selected_lines = query_cont_result[0][0] # Pega o número de consulta
-                messagebox.showinfo("Atenção", f"Selecionado {selected_lines}!") # Exibe quantas linhas foram selecionadas
-                query_db(client, collection_agent, establishment, start_date, final_date)
-                create_confirmation_frame() # Cria o frame para confirmação de alteração
                 result = selected_lines
+                messagebox.showinfo("Atenção", f"Foi gerado um excel com os paramêtros selecionados!") # Exibe quantas linhas foram selecionadas
+                query_db(client, collection_agent, establishment, start_date, final_date)
+                create_confirmation_frame()  # Cria o frame para confirmação de alteração
+                print("Valor de result:", result)
                 print("deu certo!")
             else:
                 print("Preencha todos os campos!")
@@ -162,22 +188,18 @@ def create_main_frame(): # Cria a interface grafica
     button_final_date.place(x=10, y=50)
 
     entry_start_date = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
-    entry_start_date.insert(0, start_date)
-    entry_start_date.place(x=200, y=10)
-
-    entry_start_date = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_start_date.place(x=200, y=10)
 
     entry_final_date = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_final_date.place(x=200, y=50)
 
-    label_collection_agent = ctk.CTkLabel(master=frame_main, text="Selecione um agente cobrador:")
+    label_collection_agent = ctk.CTkLabel(master=frame_main, text="Digite o cod agente cobrador:")
     label_collection_agent.place(x=10, y=90)
 
     entry_collection_agent = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)
     entry_collection_agent.place(x=200, y=90)
 
-    label_client = ctk.CTkLabel(master=frame_main, text="Selecione um client:")
+    label_client = ctk.CTkLabel(master=frame_main, text="Digite o cod client:")
     label_client.place(x=10, y=140)
 
     entry_client = ctk.CTkEntry(master=frame_main, width=100, height=30, corner_radius=8)

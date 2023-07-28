@@ -69,7 +69,7 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
                 f"DECLARE @datainicio DATE = '{data_inicio}'" \
                 f"DECLARE @datafim DATE = '{data_fim}'" \
-                f" SELECT  num_documento, dat_vencimento, vlr_documento" \
+                f" SELECT  num_documento, dat_vencimento, vlr_documento, cod_agente" \
                 f" FROM CTREC" \
                 f" WHERE cod_estabe = @estabelecimento" \
                 f" AND cod_agente = @agente" \
@@ -87,6 +87,7 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
                 "DOCUMENTO": row[0],
                 "VENCIMENTO": row[1],
                 "VALOR": row[2],
+                "COD_AGENTE": row[3]
             }
             records.append(record)
 
@@ -106,18 +107,30 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
-def update_db(): # Faz o update no banco
+def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_fim): # Faz o update no banco
     global cursor
 
     try:
-        update = f""
-        cursor.execute(update)
-        result = cursor.fetchall()
-        print(result)
+        query = f"begin tran;" \
+                f"DECLARE @cliente INT = {cliente};" \
+                f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
+                f"DECLARE @agente INT = {agente};" \
+                f"DECLARE @estabelecimento INT = {estabelecimento};" \
+                f"DECLARE @datainicio DATE = '{data_inicio}';" \
+                f"DECLARE @datafim DATE = '{data_fim}';" \
+                f"UPDATE CTREC SET cod_agente = {novo_agente}" \
+                f"FROM CTREC" \
+                f" WHERE cod_estabe = @estabelecimento" \
+                f" AND cod_agente = @agente" \
+                f" AND status = 'A'" \
+                f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial);" \
+                f"commit tran"
+
+        print(query)
+
+        cursor.execute(query)
+        cursor.fetchall()
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
-
-
-#access_db()
-#query_db(49918, 2747, 1, '27/07/2023', '27/07/2023')
