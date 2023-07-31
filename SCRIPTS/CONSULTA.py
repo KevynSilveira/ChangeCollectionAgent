@@ -6,7 +6,6 @@ conn = None  # Variável global para armazenar a conexão com o banco de dados
 cursor = None  # Variável global para armazenar o cursor
 
 def access_db():
-    """Acessa o banco de dados SQL Server usando as configurações do arquivo config.ini."""
     global conn, cursor  # Utiliza as variáveis globais
 
     try:
@@ -31,25 +30,30 @@ def close_db(): # Fecha a conexão com o banco de dados.
     if conn is not None:
         conn.close()
 
-def query_count_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a consulta no banco e traz o resultado desejado
+def query_count_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz a consulta no banco e traz o resultado desejado
 
     try:
         query = f"DECLARE @cliente INT = {cliente};" \
                 f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
                 f"DECLARE @agente INT = {agente};" \
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
-                f"DECLARE @datainicio DATE = '{data_inicio}'" \
-                f"DECLARE @datafim DATE = '{data_fim}'" \
-                f" ; WITH ResultadoConsulta AS (" \
-                f" SELECT cod_documento FROM CTREC" \
+                f"DECLARE @datainicio DATE = '{data_inicio}';" \
+                f"DECLARE @datafim DATE = '{data_fim}';" \
+                f"DECLARE @parcela varchar = '{parcela}';" \
+                f"WITH ResultadoConsulta AS (" \
+                f" SELECT TOP 800" \
+                f"  Cod_Documento" \
+                f" FROM CTREC" \
                 f" WHERE cod_estabe = @estabelecimento" \
-                f" AND cod_agente = @agente" \
-                f" AND status = 'A'" \
-                f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f"  AND cod_agente = @agente" \
+                f"  AND status = 'A'" \
+                f"  AND Par_Documento = @parcela" \
+                f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
                 f")" \
-                f" SELECT COUNT (*) AS Quantidadetotal" \
-                f" FROM ResultadoConsulta;"
+                f"SELECT COUNT(*) AS Quantidadetotal FROM ResultadoConsulta;"
+
+        print(query)
 
         cursor.execute(query)
         result = cursor.fetchall()
@@ -60,7 +64,7 @@ def query_count_db(cliente, agente, estabelecimento, data_inicio, data_fim): # F
         print("Erro ao executar a consulta no banco de dados:", e)
 
 
-def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a consulta no banco e traz o resultado desejado
+def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz a consulta no banco e traz o resultado desejado
 
     try:
         query = f"DECLARE @cliente INT = {cliente};" \
@@ -69,13 +73,25 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
                 f"DECLARE @datainicio DATE = '{data_inicio}'" \
                 f"DECLARE @datafim DATE = '{data_fim}'" \
-                f" SELECT  num_documento, dat_vencimento, vlr_documento, cod_agente" \
+                f"DECLARE @parcela varchar = {parcela}" \
+                f" SELECT TOP 800" \
+                f"  Cod_Documento AS Código," \
+                f"  Num_Documento AS Documento," \
+                f"  dat_vencimento AS Vencimento," \
+                f"  Par_Documento AS Parcela," \
+                f"  Cod_Agente AS Ag_Cobrador," \
+                f"  Cod_Cliente AS Cliente," \
+                f"  FORMAT(Vlr_Documento, 'C') AS Preco" \
                 f" FROM CTREC" \
                 f" WHERE cod_estabe = @estabelecimento" \
-                f" AND cod_agente = @agente" \
-                f" AND status = 'A'" \
-                f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f"  AND cod_agente = @agente" \
+                f"  AND status = 'A'" \
+                f"  AND Par_Documento = @parcela" \
+                f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f" ORDER BY {ordena};" \
+
+        print(query)
 
         cursor.execute(query)
         result = cursor.fetchall()
@@ -94,7 +110,7 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
         # Criar o DataFrame com base na lista de dicionários
         df = pd.DataFrame(records)
         # Salvar o DataFrame em um arquivo Excel
-        nome_arquivo = "Troca agente cobrador FDIC.xlsx"
+        nome_arquivo = "Troca agente cobrador.xlsx"
 
         # Verificar se o arquivo já existe e excluí-lo, se necessário
         if os.path.exists(nome_arquivo):
@@ -107,7 +123,7 @@ def query_db(cliente, agente, estabelecimento, data_inicio, data_fim): # Faz a c
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
-def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_fim): # Faz o update no banco
+def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz o update no banco
     global cursor
 
     try:
@@ -115,16 +131,29 @@ def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_f
                 f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
                 f"DECLARE @agente INT = {agente};" \
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
-                f"DECLARE @datainicio DATE = '{data_inicio}';" \
-                f"DECLARE @datafim DATE = '{data_fim}';" \
-                f"UPDATE CTREC SET cod_agente = {novo_agente}" \
-                f"FROM CTREC" \
+                f"DECLARE @datainicio DATE = '{data_inicio}'" \
+                f"DECLARE @datafim DATE = '{data_fim}'" \
+                f"DECLARE @parcela varchar = {parcela}" \
+                f"WITH CTE AS (" \
+                f" SELECT TOP 800" \
+                f"  Cod_Documento AS Código," \
+                f"  Num_Documento AS Documento," \
+                f"  dat_vencimento AS Vencimento," \
+                f"  Par_Documento AS Parcela," \
+                f"  Cod_Agente AS Ag_Cobrador," \
+                f"  Cod_Cliente AS Cliente," \
+                f"  FORMAT(Vlr_Documento, 'C') AS Preco" \
+                f" FROM CTREC" \
                 f" WHERE cod_estabe = @estabelecimento" \
-                f" AND cod_agente = @agente" \
-                f" AND status = 'A'" \
-                f" AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f" AND (cod_cliente = @cliente OR cgc_matriz = @filial);" \
-
+                f"  AND cod_agente = @agente" \
+                f"  AND status = 'A'" \
+                f"  AND Par_Documento = @parcela" \
+                f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f" ORDER BY {ordena};" \
+                f")" \
+                f"UPDATE CTE" \
+                f"SET Cod_Agente = {novo_agente};" \
 
         print(query)
 
@@ -132,7 +161,7 @@ def update_db(cliente, agente, novo_agente, estabelecimento, data_inicio, data_f
         conn.commit()
 
         rows_affected = cursor.rowcount
-        return rows_affectedat_vencim
+        return rows_affected
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
