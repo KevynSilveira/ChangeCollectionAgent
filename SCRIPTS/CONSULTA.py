@@ -53,8 +53,6 @@ def query_count_db(cliente, agente, estabelecimento, parcela, data_inicio, data_
                 f")" \
                 f"SELECT COUNT(*) AS Quantidadetotal FROM ResultadoConsulta;"
 
-        print(query)
-
         cursor.execute(query)
         result = cursor.fetchall()
 
@@ -90,8 +88,6 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
                 f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
                 f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
                 f" ORDER BY {ordena};"
-
-        print(query)
 
         cursor.execute(query)
         result = cursor.fetchall()
@@ -163,8 +159,6 @@ def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inici
                        f"SET Ag_Cobrador = {novo_agente};"
 
         final_query = query_cte + query_update
-
-        print(final_query)
 
         cursor.execute(final_query)
         conn.commit()

@@ -21,7 +21,6 @@ def create_main_frame(): # Cria a interface grafica
     month = data_hora_atual.month # Obtem o mês atual
     year = data_hora_atual.year # Obtem o dia atual
 
-
     # Definindo parâmetros do frame main
     frame_main = ctk.CTk()
     frame_main.geometry("310x310") # Definindo o tamanho do frame
@@ -90,12 +89,6 @@ def create_main_frame(): # Cria a interface grafica
         def back(): # Volta a tela
             frame_confirmation.destroy()
         def confirm(): # Confirma o update do agente cobrador
-            print("comando executado")
-            print("estabelecimento:", establishment)
-            print("Data inicio:", start_date)
-            print("Data final:", final_date)
-            print("Cliente:", client)
-            print("Agente cobrador:", collection_agent)
 
             new_collection_agent = entry_new_collection_agent.get()
             #new_collection_agent = int(new_collection_agent)
@@ -107,14 +100,9 @@ def create_main_frame(): # Cria a interface grafica
                 response = messagebox.askyesno("Confirmação", f"Você tem certeza que deseja alterar o agente cobrador {collection_agent} pelo {new_collection_agent}?")
                 if response:
                     # Código a ser executado se o usuário confirmar a ação
-                    print("Ação confirmada!")
                     access_db()
                     lines_affected = update_db(client, collection_agent, new_collection_agent, establishment, portion, start_date, final_date, order)
                     messagebox.showinfo("Atenção", f"Foram afetadas {lines_affected} linhas")
-                else:
-                    # Código a ser executado se o usuário cancelar a ação
-                    print("Ação cancelada!")
-
 
         frame_confirmation = ctk.CTkFrame(master=frame_main, width=290, height=295, corner_radius=8)
         frame_confirmation.place(x=10, y=10)
@@ -143,8 +131,6 @@ def create_main_frame(): # Cria a interface grafica
             # Converte a data
             start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
             final_date_dt = datetime.datetime.strptime(final_date, "%d/%m/%Y")
-
-
             start_date = entry_start_date.get() # Pega o campo data inicio
             final_date = entry_final_date.get() # Pega o campo data final
             collection_agent = entry_collection_agent.get() # Pega o campo agente cobrador
@@ -199,7 +185,6 @@ def create_main_frame(): # Cria a interface grafica
                 query_db(client, collection_agent, establishment, portion, start_date, final_date, order)
                 create_confirmation_frame()  # Cria o frame para confirmação de alteração
                 print("Valor de result:", result)
-                print("deu certo!")
             else:
                 messagebox.showerror("Atenção", "Preencha todos os campos!")
                 print(start_date)
@@ -254,7 +239,6 @@ def create_main_frame(): # Cria a interface grafica
     combobox_order.set("Ordenação") # Indica que precisa escolher um ordenação
     combobox_order.configure(justify="center") # Centraliza o texto na combobox
     combobox_order.place(x=80, y=220)
-
 
     # Centraliza o texto no entry
     entry_collection_agent.configure(justify="center")
