@@ -67,14 +67,14 @@ def query_count_db(cliente, agente, estabelecimento, parcela, data_inicio, data_
 def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz a consulta no banco e traz o resultado desejado
 
     try:
-        query = f"DECLARE @cliente INT = {cliente};" \
+        query =f"DECLARE @cliente INT = {cliente};" \
                 f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
                 f"DECLARE @agente INT = {agente};" \
                 f"DECLARE @estabelecimento INT = {estabelecimento};" \
-                f"DECLARE @datainicio DATE = '{data_inicio}'" \
-                f"DECLARE @datafim DATE = '{data_fim}'" \
-                f"DECLARE @parcela varchar = {parcela}" \
-                f" SELECT TOP 800" \
+                f"DECLARE @datainicio DATE = '{data_inicio}';" \
+                f"DECLARE @datafim DATE = '{data_fim}';" \
+                f"DECLARE @parcela varchar = '{parcela}';" \
+                f"SELECT TOP 800" \
                 f"  Cod_Documento AS Código," \
                 f"  Num_Documento AS Documento," \
                 f"  dat_vencimento AS Vencimento," \
@@ -89,21 +89,26 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
                 f"  AND Par_Documento = @parcela" \
                 f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
                 f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
-                f" ORDER BY {ordena};" \
+                f" ORDER BY {ordena};"
 
         print(query)
 
         cursor.execute(query)
         result = cursor.fetchall()
 
+        print(result)
+
         # Criar uma lista de dicionários representando os registros
         records = []
         for row in result:
             record = {
-                "DOCUMENTO": row[0],
-                "VENCIMENTO": row[1],
-                "VALOR": row[2],
-                "COD_AGENTE": row[3]
+                "COD_DOCUMENTO": row[0],
+                "NUM_DOCUMENTO": row[1],
+                "DATA_VENCIMENTO": row[2],
+                "PARCELA": row[3],
+                "COD_AGENTE": row[4],
+                "COD_CLIENTE": row[5],
+                "VALOR": row[6]
             }
             records.append(record)
 
@@ -126,38 +131,42 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
 def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz o update no banco
     global cursor
 
+
     try:
-        query = f"DECLARE @cliente INT = {cliente};" \
-                f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente);" \
-                f"DECLARE @agente INT = {agente};" \
-                f"DECLARE @estabelecimento INT = {estabelecimento};" \
-                f"DECLARE @datainicio DATE = '{data_inicio}'" \
-                f"DECLARE @datafim DATE = '{data_fim}'" \
-                f"DECLARE @parcela varchar = {parcela}" \
-                f"WITH CTE AS (" \
-                f" SELECT TOP 800" \
-                f"  Cod_Documento AS Código," \
-                f"  Num_Documento AS Documento," \
-                f"  dat_vencimento AS Vencimento," \
-                f"  Par_Documento AS Parcela," \
-                f"  Cod_Agente AS Ag_Cobrador," \
-                f"  Cod_Cliente AS Cliente," \
-                f"  FORMAT(Vlr_Documento, 'C') AS Preco" \
-                f" FROM CTREC" \
-                f" WHERE cod_estabe = @estabelecimento" \
-                f"  AND cod_agente = @agente" \
-                f"  AND status = 'A'" \
-                f"  AND Par_Documento = @parcela" \
-                f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
-                f" ORDER BY {ordena};" \
-                f")" \
-                f"UPDATE CTE" \
-                f"SET Cod_Agente = {novo_agente};" \
+        query_cte = f"DECLARE @cliente INT = {cliente}; " \
+                    f"DECLARE @filial INT = (SELECT cgc_matriz FROM CLIEN WHERE codigo = @cliente); " \
+                    f"DECLARE @agente INT = {agente}; " \
+                    f"DECLARE @estabelecimento INT = {estabelecimento}; " \
+                    f"DECLARE @datainicio DATE = '{data_inicio}'; " \
+                    f"DECLARE @datafim DATE = '{data_fim}'; " \
+                    f"DECLARE @parcela varchar(255) = '{parcela}'; " \
+                    f"WITH CTE AS ( " \
+                    f" SELECT TOP 800" \
+                    f"  Cod_Documento AS Código," \
+                    f"  Num_Documento AS Documento," \
+                    f"  dat_vencimento AS Vencimento," \
+                    f"  Par_Documento AS Parcela," \
+                    f"  Cod_Agente AS Ag_Cobrador," \
+                    f"  Cod_Cliente AS Cliente," \
+                    f"  FORMAT(Vlr_Documento, 'C') AS Preco" \
+                    f" FROM CTREC" \
+                    f" WHERE cod_estabe = @estabelecimento" \
+                    f"  AND cod_agente = @agente" \
+                    f"  AND status = 'A'" \
+                    f"  AND Par_Documento = @parcela" \
+                    f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
+                    f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                    f" ORDER BY {ordena}" \
+                    f") "
 
-        print(query)
+        query_update = f"UPDATE CTE " \
+                       f"SET Ag_Cobrador = {novo_agente};"
 
-        cursor.execute(query)
+        final_query = query_cte + query_update
+
+        print(final_query)
+
+        cursor.execute(final_query)
         conn.commit()
 
         rows_affected = cursor.rowcount

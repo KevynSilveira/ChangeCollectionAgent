@@ -109,7 +109,7 @@ def create_main_frame(): # Cria a interface grafica
                     # Código a ser executado se o usuário confirmar a ação
                     print("Ação confirmada!")
                     access_db()
-                    lines_affected = update_db(client, collection_agent, new_collection_agent, establishment,portion, start_date, final_date)
+                    lines_affected = update_db(client, collection_agent, new_collection_agent, establishment, portion, start_date, final_date, order)
                     messagebox.showinfo("Atenção", f"Foram afetadas {lines_affected} linhas")
                 else:
                     # Código a ser executado se o usuário cancelar a ação
