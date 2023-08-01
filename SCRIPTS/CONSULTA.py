@@ -14,6 +14,7 @@ def access_db():
         username = ""
         password = ""
 
+
         # Monta os dados para enviar para o banco de dados (credenciais)
         conn_string = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
         conn = pyodbc.connect(conn_string)
@@ -75,18 +76,21 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
                 f"SELECT TOP 800" \
                 f"  Cod_Documento AS Código," \
                 f"  Num_Documento AS Documento," \
-                f"  dat_vencimento AS Vencimento," \
-                f"  Par_Documento AS Parcela," \
+                f"  CONVERT(varchar, Dat_Emissao, 103) AS Emissao," \
+                f"  CONVERT(varchar, Dat_Vencimento, 103) AS Vencimento," \
                 f"  Cod_Agente AS Ag_Cobrador," \
-                f"  Cod_Cliente AS Cliente," \
+                f"  CT.Cod_Cliente AS Cliente," \
+                f"  V.Razao_Social AS Razao_Cocial," \
+                f"  Par_Documento AS Parcela," \
                 f"  FORMAT(Vlr_Documento, 'C') AS Preco" \
-                f" FROM CTREC" \
+                f" FROM CTREC CT" \
+                f" LEFT JOIN V_CLIEN V ON CT.Cod_Cliente = V.Cod_Cliente" \
                 f" WHERE cod_estabe = @estabelecimento" \
                 f"  AND cod_agente = @agente" \
                 f"  AND status = 'A'" \
                 f"  AND Par_Documento = @parcela" \
                 f"  AND dat_vencimento BETWEEN @datainicio AND @datafim" \
-                f"  AND (cod_cliente = @cliente OR cgc_matriz = @filial)" \
+                f"  AND (CT.cod_cliente = @cliente OR cgc_matriz = @filial)" \
                 f" ORDER BY {ordena};"
 
         cursor.execute(query)
@@ -100,11 +104,13 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
             record = {
                 "COD_DOCUMENTO": row[0],
                 "NUM_DOCUMENTO": row[1],
-                "DATA_VENCIMENTO": row[2],
-                "PARCELA": row[3],
+                "DATA_EMISSÃO": row[2],
+                "DATA_VENCIMENTO": row[3],
                 "COD_AGENTE": row[4],
                 "COD_CLIENTE": row[5],
-                "VALOR": row[6]
+                "RAZÃO SOCIAL": row[6],
+                "PARCELA": row[7],
+                "PREÇO": row[8]
             }
             records.append(record)
 
@@ -126,7 +132,6 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
         print("Erro ao executar a consulta no banco de dados:", e)
 def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz o update no banco
     global cursor
-
 
     try:
         query_cte = f"DECLARE @cliente INT = {cliente}; " \

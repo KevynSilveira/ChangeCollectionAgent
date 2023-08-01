@@ -128,26 +128,32 @@ def create_main_frame(): # Cria a interface grafica
             # Chama as variaveis global
             global establishment, start_date, final_date, collection_agent, query_cont_result, result, client, portion, order
 
-            # Converte a data
+            # Converte as datas de inicio e fim
             start_date_dt = datetime.datetime.strptime(start_date, "%d/%m/%Y")
             final_date_dt = datetime.datetime.strptime(final_date, "%d/%m/%Y")
+
             start_date = entry_start_date.get() # Pega o campo data inicio
             final_date = entry_final_date.get() # Pega o campo data final
-            collection_agent = entry_collection_agent.get() # Pega o campo agente cobrador
-            client = entry_client.get() # Pega o campo cliente
-            portion = combobox_portion.get() # Pega o campo parcela
-            establishment = combobox_establishment.get() # Verifica qual estabelecimento é e atribui o valor a ele
-            order = combobox_order.get()
 
+            collection_agent = entry_collection_agent.get() # Pega o campo agente cobrador
+
+            client = entry_client.get() # Pega o campo cliente
+
+            portion = combobox_portion.get() # Pega o campo parcela
+
+            establishment = combobox_establishment.get() # Verifica qual estabelecimento é e atribui o valor a ele
+
+            order = combobox_order.get() # Pega a ordenação
+
+            # Muda a variavel para pesquisar no banco
             if establishment == "SC":
                 establishment = "1"
 
             elif establishment == "RS":
                 establishment = "2"
 
-            else:
-                messagebox.showerror("ATENÇÃO!", "Selecione um estabelecimento!")
 
+            # Muda a ordenação para pesquisa no banco, para acrescentar apenas adicionar o if
             if order == "Data Vencimento":
                 order = "dat_vencimento ASC"
 
@@ -157,9 +163,8 @@ def create_main_frame(): # Cria a interface grafica
             elif order == "Menor Valor":
                 order = "vlr_documento ASC"
 
-            else:
-                messagebox.showerror("ATENÇÃO!", "Selecione a ordenação!")
 
+            # Verifica os campos para inserção dos dados no script sql
             if portion == "Parcela":
                 messagebox.showerror("Atenção", "Selecione uma parcela!")
 
@@ -173,17 +178,23 @@ def create_main_frame(): # Cria a interface grafica
             # Verifica se todos os campos estão preenchidos
             if start_date_dt < final_date_dt and start_date != "" and final_date != "" and collection_agent != "" and client != "" and (establishment == "1" or establishment == "2") and portion != "Parcela":
 
-                global result
+                global result # Chama a variavel de resultado global
+
                 establishment = int(establishment) # Converte para inteiro
                 collection_agent = int(collection_agent) # Converte para inteiro
 
                 access_db() # Acessa o banco de dados
                 query_cont_result = query_count_db(client, collection_agent, establishment, portion, start_date, final_date, order) # Faz a consulta e pega os parametros com base nas informações preenchidas
+
                 selected_lines = query_cont_result[0][0] # Pega o número de consulta
-                result = selected_lines
+                result = selected_lines # atribui o resultado d quantidade de linhas para a variavel global result
+
                 messagebox.showinfo("Atenção", f"Foi gerado um excel com os paramêtros selecionados!") # Exibe quantas linhas foram selecionadas
+
                 query_db(client, collection_agent, establishment, portion, start_date, final_date, order)
+
                 create_confirmation_frame()  # Cria o frame para confirmação de alteração
+
                 print("Valor de result:", result)
             else:
                 messagebox.showerror("Atenção", "Preencha todos os campos!")
