@@ -5,15 +5,15 @@ import os
 conn = None  # Variável global para armazenar a conexão com o banco de dados
 cursor = None  # Variável global para armazenar o cursor
 
-def access_db():
+def access_db(): # Acessa o banco de dados
     global conn, cursor  # Utiliza as variáveis globais
 
     try:
+        # Credenciais do banco de dados
         server = ""
         database = ""
         username = ""
         password = ""
-
 
         # Monta os dados para enviar para o banco de dados (credenciais)
         conn_string = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
@@ -54,8 +54,8 @@ def query_count_db(cliente, agente, estabelecimento, parcela, data_inicio, data_
                 f")" \
                 f"SELECT COUNT(*) AS Quantidadetotal FROM ResultadoConsulta;"
 
-        cursor.execute(query)
-        result = cursor.fetchall()
+        cursor.execute(query) # Executa a query
+        result = cursor.fetchall() # Retorna os resultados do select
 
         return result
 
@@ -93,14 +93,12 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
                 f"  AND (CT.cod_cliente = @cliente OR cgc_matriz = @filial)" \
                 f" ORDER BY {ordena};"
 
-        cursor.execute(query)
-        result = cursor.fetchall()
+        cursor.execute(query) # Executa a query
+        result = cursor.fetchall() # Retorna os resultados do select
 
-        print(result)
+        records = []# Criar uma lista de dicionários representando os registros
 
-        # Criar uma lista de dicionários representando os registros
-        records = []
-        for row in result:
+        for row in result: # Faz a varredura e adiciona as linhas em uma lista
             record = {
                 "COD_DOCUMENTO": row[0],
                 "NUM_DOCUMENTO": row[1],
@@ -114,24 +112,24 @@ def query_db(cliente, agente, estabelecimento, parcela, data_inicio, data_fim, o
             }
             records.append(record)
 
-        # Criar o DataFrame com base na lista de dicionários
-        df = pd.DataFrame(records)
-        # Salvar o DataFrame em um arquivo Excel
-        nome_arquivo = "Troca agente cobrador.xlsx"
+        df = pd.DataFrame(records) # Criar o DataFrame com base na lista de dicionários
 
-        # Verificar se o arquivo já existe e excluí-lo, se necessário
-        if os.path.exists(nome_arquivo):
+        nome_arquivo = "Troca agente cobrador.xlsx" # Nome do arquivo a ser salvo
+
+        if os.path.exists(nome_arquivo): # Verificar se o arquivo já existe e excluí-lo, se necessário
             os.remove(nome_arquivo)
 
         df.to_excel(nome_arquivo, index=False)
 
-        print(f"Resultados salvos em '{nome_arquivo}'")
+        print(f"Arquivo '{nome_arquivo}' foi gerado!")
         return result
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)
-def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz o update no banco
-    global cursor
+
+
+def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inicio, data_fim, ordena): # Faz o update do novo agente cobrador
+    global cursor # Pega o cursor global
 
     try:
         query_cte = f"DECLARE @cliente INT = {cliente}; " \
@@ -160,16 +158,14 @@ def update_db(cliente, agente, novo_agente, estabelecimento, parcela, data_inici
                     f" ORDER BY {ordena}" \
                     f") "
 
-        query_update = f"UPDATE CTE " \
-                       f"SET Ag_Cobrador = {novo_agente};"
+        query_update = f"UPDATE CTE SET Ag_Cobrador = {novo_agente};"
+        final_query = query_cte + query_update # Concatena as query
 
-        final_query = query_cte + query_update
+        cursor.execute(final_query) # Executa a query
+        conn.commit() # Confirma o update
 
-        cursor.execute(final_query)
-        conn.commit()
-
-        rows_affected = cursor.rowcount
-        return rows_affected
+        rows_affected = cursor.rowcount # Verifica quantas linhas foram afetadas
+        return rows_affected # Retorna o valor da linha para armazenar em uma variavel
 
     except pyodbc.Error as e:
         print("Erro ao executar a consulta no banco de dados:", e)

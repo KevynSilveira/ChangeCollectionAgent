@@ -89,9 +89,7 @@ def create_main_frame(): # Cria a interface grafica
         def back(): # Volta a tela
             frame_confirmation.destroy()
         def confirm(): # Confirma o update do agente cobrador
-
             new_collection_agent = entry_new_collection_agent.get()
-            #new_collection_agent = int(new_collection_agent)
 
             if not new_collection_agent:  # Verifica se a variável está vazia
                 messagebox.showerror("Erro", "Preencha todos os campos!")
